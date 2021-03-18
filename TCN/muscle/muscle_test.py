@@ -34,11 +34,9 @@ parser.add_argument('--optim', type=str, default='Adam',
                     help='optimizer to use (default: Adam)')
 parser.add_argument('--nhid', type=int, default=150,
                     help='number of hidden units per layer (default: 150)')
-parser.add_argument('--input_size', type=int, default=60,
-                    help='input size (default: 60)')
 parser.add_argument('--seed', type=int, default=1111,
                     help='random seed (default: 1111)')
-parser.add_argument('--window_size', type=int, default=60,
+parser.add_argument('--window_size', type=int, default=6000,
                     help='window size')
 parser.add_argument('--batch_size', type=int, default=32,
                     help='batch size')
@@ -59,7 +57,7 @@ if 600000 % args.window_size != 0:
 
 training_X, training_Y, validation_X, validation_Y, test_X, test_Y = data_generator()
 
-input_size = args.input_size
+input_size = args.window_size
 n_channels = [args.nhid] * args.levels
 kernel_size = args.ksize
 dropout = args.dropout
