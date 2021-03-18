@@ -5,10 +5,11 @@ from torch.autograd import Variable
 import torch.optim as optim
 import sys
 
-from TCN.muscle.model import TCN
+
 
 sys.path.append("../../")
 from TCN.muscle.utils import data_generator
+from TCN.muscle.model import TCN
 import numpy as np
 
 
@@ -33,13 +34,13 @@ parser.add_argument('--optim', type=str, default='Adam',
                     help='optimizer to use (default: Adam)')
 parser.add_argument('--nhid', type=int, default=150,
                     help='number of hidden units per layer (default: 150)')
-parser.add_argument('--input_size', type=int, default=88,
-                    help='input size (default: 88)')
+parser.add_argument('--input_size', type=int, default=60,
+                    help='input size (default: 60)')
 parser.add_argument('--seed', type=int, default=1111,
                     help='random seed (default: 1111)')
 parser.add_argument('--window_size', type=int, default=60,
                     help='window size')
-parser.add_argument('--batch_size', type=int, default=64,
+parser.add_argument('--batch_size', type=int, default=32,
                     help='batch size')
 
 args = parser.parse_args()
@@ -56,7 +57,7 @@ print(args)
 if 600000 % args.window_size != 0:
     raise('window size must be a divsior of 600000')
 
-training_X, training_Y, validation_X, validation_Y, test_X, test_Y = data_generator(args.data)
+training_X, training_Y, validation_X, validation_Y, test_X, test_Y = data_generator()
 
 input_size = args.input_size
 n_channels = [args.nhid] * args.levels
@@ -87,8 +88,10 @@ def train(ep, window_size, batch_size):
         for t_idx in range(s_idx, e_idx):
             train_data_list.append(training_X[t_idx:t_idx + window_size, :])
             train_label_list.append(training_Y[t_idx:t_idx + window_size])
-        x_batch = torch.cat(train_data_list).permute(0,2,1)
-        y_batch = torch.cat(train_label_list)
+
+        x_batch = torch.stack(train_data_list).permute(0,2,1)
+
+        y_batch = torch.stack(train_label_list)
 
         if args.cuda:
             x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
@@ -117,7 +120,7 @@ def evaluate(X, Y, window_size, name='Eval'):
     count = 0
     with torch.no_grad():
         for t_idx in eval_window_start:
-            x, y = X[t_idx:t_idx+window_size, :].unsqueeze(0), Y[t_idx:t_idx+window_size]
+            x, y = X[t_idx:t_idx+window_size, :].unsqueeze(0).permute(0,2,1), Y[t_idx:t_idx+window_size].unsqueeze(0)
             if args.cuda:
                 x, y = x.cuda(), y.cuda()
             output = model(x)

@@ -7,11 +7,11 @@ def data_generator(dataset='./data/datalabel.mat'):
     print('data...')
     data = loadmat(dataset)
 
-    concat_data = np.concatenate(data['datalabel'][0,0], data['datalabel'][0,1])
+    concat_data = np.concatenate([data['datalabel'][0,0], data['datalabel'][0,1]])
 
     training_data = concat_data[:600000, :]
-    validation_data = concat_data[600000:700000, :]
-    test_data = concat_data[700000:, :]
+    validation_data = concat_data[600000:696000, :]
+    test_data = concat_data[696000:804000, :]
 
     training_X = torch.Tensor(training_data[:, :-1])
     training_Y = torch.LongTensor(training_data[:, -1])
